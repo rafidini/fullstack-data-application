@@ -3,7 +3,7 @@ import logging
 from flask import Flask, g, request, make_response, session, redirect
 import json
 from flask_oidc import OpenIDConnect
-
+from logging import log
 from os.path import join, dirname, realpath
 import requests
 
@@ -11,7 +11,7 @@ UPLOADS_PATH = join(dirname(realpath(__file__)), 'client_secrets.json')
 logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 
-print(UPLOADS_PATH)
+#log(UPLOADS_PATH)
 app.config.update({
     'SECRET_KEY': 'SomethingNotEntirelySecret',
     'TESTING': True,
@@ -52,28 +52,34 @@ def hello_me():
     """Example for protected endpoint that extracts private information from the OpenID Connect id_token.
        Uses the accompanied access_token to access a backend service.
     """
-
+    log("Step 1.")
     info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
 
+    log("Step 2.")
     username = info.get('preferred_username')
     email = info.get('email')
     user_id = info.get('sub')
 
+    print("Step 3.")
     if user_id in oidc.credentials_store:
         try:
             from oauth2client.client import OAuth2Credentials
+            print("Step 4.1.1")
             access_token = OAuth2Credentials.from_json(oidc.credentials_store[user_id]).access_token
             headers = {'Authorization': 'Bearer %s' % (access_token)}
             # YOLO
-            greeting = requests.get('http://127.0.0.1:1235/protected', headers=headers).text
+            print("Step 4.1.2")
+            greeting = requests.get('http://localhost:8080/protected', headers=headers).text
+            print("Step 4.1.3")
         except:
+            print("Step 4.2")
             greeting = "Hello %s" % username
-
+    log("Step 5.")
 
     return ("""%s your email is %s and your user_id is %s!
                <ul>
                  <li><a href="/">Home</a></li>
-                 <li><a href="//localhost:8080/auth/realms/master/account?referrer=flask-app&referrer_uri=http://localhost:5000/private&">Account</a></li>
+                 <li><a href="//localhost:8080/auth/realms/master/account?referrer=flask-app&referrer_uri=http://localhost:5001/private&">Account</a></li>
                 </ul>""" %
             (greeting, email, user_id))
 

@@ -9,6 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os 
+from sqlalchemy.orm import Session
 
 
 POSTGRES_USER = os.environ.get("POSTGRES_USER")
@@ -67,15 +68,18 @@ app = FastAPI(
 def read_root():
     return {"Hello": "World"}
 
-@app.get("/lol")
+@app.get("/date")
 def get_date():
     return {"date": str(datetime.now())}
 
-from typing import List
-
-from sqlalchemy.orm import Session
-from fastapi import HTTPException
-from datetime import datetime
+@app.get("/add")
+def add_post(db: Session):
+    db_post = {"name": "Naruto", "id":9}
+    db.add(db_post)
+    db.commit()
+    db.refresh(db_post)
+    db_post.id = str(db_post['id'])
+    return {'response': 'Success'}
 
 
 def get_post_by_id(post_id: str, db: Session) -> PostModel:
@@ -95,8 +99,3 @@ def create_post(db: Session, post: Post) -> Post:
     db.refresh(db_post)
     db_post.id = str(db_post.id)
     return db_post
-
-@app.get("/create_post")
-def add_post():
-    create_post()
-    return {"results":1}
