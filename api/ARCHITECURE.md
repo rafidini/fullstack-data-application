@@ -155,10 +155,6 @@ class Post(BaseModel):
     description: Optional[str]
     created_at: Annotated[datetime, Field(default_factory=lambda: datetime.now())]
     updated_at: Annotated[datetime, Field(default_factory=lambda: datetime.now())]
-
-    class Config:
-        orm_mode = True
-
  ```
 
 
@@ -191,6 +187,7 @@ print(SQLALCHEMY_DATABASE_URL)
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL
 )
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=True, bind=engine)
 
 BaseSQL = declarative_base()

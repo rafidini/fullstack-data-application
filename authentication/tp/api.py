@@ -19,3 +19,9 @@ def protected(token: str = Depends(oauth2_scheme)):
         "Hello": "World",
         "user_infos": token
     }
+
+@app.get("/")
+def hello_world():
+    return {
+        "Hello": "World",
+    }
